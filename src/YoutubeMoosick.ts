@@ -7,6 +7,7 @@ import { IllegalArgumentError, IllegalStateError } from './resources/errors/inde
 import { URLSearchParams } from 'url';
 import { GeneralParser, GetArtistParser, GetAlbumParser, GetPlaylistParser } from './parsers/index.js';
 import { AsyncConstructor } from './blocks/asyncConstructor.js';
+import { extractYtcfgConfig } from './blocks/ytcfg.js';
 import type { ArtistURLFullResult } from './resources/etc/rawResultTypes/rawGetArtistURL.js';
 import type { SearchSuggestionsFullResult } from './resources/etc/rawResultTypes/rawGetSearchSuggestions.js';
 import type { AlbumURLFullResult } from './resources/etc/rawResultTypes/rawGetAlbumURL.js';
@@ -109,13 +110,8 @@ export class YoutubeMoosick extends AsyncConstructor {
 		});
 
 		const res = await this.client.get<string, AxiosResponse<string>>('/');
-		const dataString = /(?<=ytcfg\.set\().+(?=\);)/.exec(res.data)?.[0];
 
-		if (dataString == null) {
-			throw new IllegalStateError('API initialization returned a nullish value');
-		}
-
-		this.config = JSON.parse(dataString) as YtCfgMain;
+		this.config = extractYtcfgConfig(res.data);
 
 		return this;
 	}

@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -23,6 +27,7 @@ const index_js_1 = require("./resources/errors/index.js");
 const url_1 = require("url");
 const index_js_2 = require("./parsers/index.js");
 const asyncConstructor_js_1 = require("./blocks/asyncConstructor.js");
+const ytcfg_js_1 = require("./blocks/ytcfg.js");
 const index_js_3 = require("./resources/resultTypes/index.js");
 const index_js_4 = require("./resources/generalTypes/index.js");
 __exportStar(require("./resources/resultTypes/index.js"), exports);
@@ -87,11 +92,7 @@ class YoutubeMoosick extends asyncConstructor_js_1.AsyncConstructor {
             return res;
         });
         const res = await this.client.get('/');
-        const dataString = /(?<=ytcfg\.set\().+(?=\);)/.exec(res.data)?.[0];
-        if (dataString == null) {
-            throw new index_js_1.IllegalStateError('API initialization returned a nullish value');
-        }
-        this.config = JSON.parse(dataString);
+        this.config = (0, ytcfg_js_1.extractYtcfgConfig)(res.data);
         return this;
     }
     /**
